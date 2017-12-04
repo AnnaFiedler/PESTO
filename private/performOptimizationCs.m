@@ -11,6 +11,8 @@ function parameters = performOptimizationCs(parameters, negLogPost, iMS, J_0, op
     x0 = parameters.MS.par0(:,iMS);
     lb = parameters.min;
     ub = parameters.max;
+    
+    import optim.coordinateSearch;
   
     [theta, J_opt, exitflag, output] = coordinateSearch(...
         negLogPost,...

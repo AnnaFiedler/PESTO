@@ -28,7 +28,7 @@ for j=1:length(cell_results_all)
        case 'dhc2'
            res.alg = '-'; % ignore
        case 'dhc3'
-           res.alg = 'ydhc3';
+           res.alg = '-';
        otherwise
    end
    
@@ -152,12 +152,12 @@ end
 %% visualize
 markers = {'o','+','*','.','x','s','d','^','v','<','>','p','h'};
 nMarkers = length(markers);
-colors  = {'r','m','c','y','g','b','k'};
+colors  = {'r','m','c','g','b','k'};
 nColors = length(colors);
 
-TextSizes.DefaultAxesFontSize = 14;
-TextSizes.DefaultTextFontSize = 18;
-set(0,TextSizes);
+% TextSizes.DefaultAxesFontSize = 14;
+% TextSizes.DefaultTextFontSize = 18;
+% set(0,TextSizes);
 
 % smooth, unimodal
 cell_keys = keys(map_shares);
@@ -328,7 +328,7 @@ load('cell_results_test-local-noise-bobyqa.mat');
 cell_results_local_noise_bobyqa = cell_results;
 
 % gather all possible results in one list
-cell_results_all_noise = vertcat(cell_results_fixeddim_local_noise,cell_results_fixeddim_global_noise,cell_results_arbdim_local_noise,cell_results_arbdim_global_noise,cell_results_local_noise_dhc3);
+cell_results_all_noise = vertcat(cell_results_fixeddim_local_noise,cell_results_fixeddim_global_noise,cell_results_arbdim_local_noise,cell_results_arbdim_global_noise,cell_results_local_noise_dhc3,cell_results_local_noise_bobyqa);
 
 % better names
 for j=1:length(cell_results_all_noise)

@@ -5,6 +5,8 @@ close all;
 
 addpath(genpath('../examples'));
 
+import optim.*
+
 % Seed random number generator
 rng(0);
 
@@ -53,16 +55,16 @@ lb = lowerBound * ones(4,1);
 ub = upperBound * ones(4,1);
 
 disp('fmincon:');
-parameters_fmincon = runMultiStarts(objectiveFunction, 1, n_starts, 'fmincon', 4, lb, ub);
-printResultParameters(parameters_fmincon);
+% parameters_fmincon = runMultiStarts(objectiveFunction, 1, n_starts, 'fmincon', 4, lb, ub);
+% printResultParameters(parameters_fmincon);
 
 % disp('hctt:');
 % parameters_hctt = runMultiStarts(objectiveFunction, 1, n_starts, 'hctt', 4, lb, ub);
 % printResultParameters(parameters_hctt);
 
 disp('cs:');
-parameters_cs = runMultiStarts(objectiveFunction, 1, n_starts, 'cs', 4, lb, ub);
-printResultParameters(parameters_cs);
+% parameters_cs = runMultiStarts(objectiveFunction, 1, n_starts, 'cs', 4, lb, ub);
+% printResultParameters(parameters_cs);
 
 disp('dhc:');
 parameters_dhc = runMultiStarts(objectiveFunction, 1, n_starts, 'dhc', 4, lb, ub);

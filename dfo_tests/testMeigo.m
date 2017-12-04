@@ -63,7 +63,7 @@ MeigoOptions = struct(...
 optionsMultistartMeigo = optionsPesto.copy();
 optionsMultistartMeigo.localOptimizer = 'meigo-ess';
 optionsMultistartMeigo.localOptimizerOptions = MeigoOptions;
-optionsMultistartMeigo.n_starts = 3;
+optionsMultistartMeigo.n_starts = 5;
 rng(0);
 parameters_dhc = getMultiStarts(parameters, objectiveFunction, optionsMultistartMeigo);
 
@@ -77,7 +77,7 @@ MeigoOptions = struct(...
 optionsMultistartMeigo = optionsPesto.copy();
 optionsMultistartMeigo.localOptimizer = 'meigo-ess';
 optionsMultistartMeigo.localOptimizerOptions = MeigoOptions;
-optionsMultistartMeigo.n_starts = 3;
+optionsMultistartMeigo.n_starts = 5;
 rng(0);
 parameters_ydhc = getMultiStarts(parameters, objectiveFunction, optionsMultistartMeigo);
 
@@ -91,7 +91,7 @@ MeigoOptions = struct(...
 optionsMultistartMeigo = optionsPesto.copy();
 optionsMultistartMeigo.localOptimizer = 'meigo-ess';
 optionsMultistartMeigo.localOptimizerOptions = MeigoOptions;
-optionsMultistartMeigo.n_starts = 3;
+optionsMultistartMeigo.n_starts = 5;
 rng(0);
 parameters_fmincon = getMultiStarts(parameters, objectiveFunction, optionsMultistartMeigo);
 
@@ -182,7 +182,7 @@ MeigoOptions = struct(...
     'finish', 'dhc', ...
     'iterprint', 1) ...
     );
-optionsMultistartMeigo = optionsPesto.copy();
+% optionsMultistartMeigo = optionsPesto.copy();
 optionsMultistartMeigo.localOptimizer = 'meigo-ess';
 optionsMultistartMeigo.localOptimizerOptions = MeigoOptions;
 optionsMultistartMeigo.n_starts = 3;
