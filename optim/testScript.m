@@ -1,8 +1,12 @@
 clear
 
-x.p=1*ones(1000,1);
+x.p=-1*ones(100,1);
 nparams = struct('maxit',1000,'toler',1.0e-4,'method','direct');
 fun = @testFun;
+
+addpath('../dfo_tests');
+% fun = @TF.f_rosenbrock;
+
 
 
 [exdir,~,~]=fileparts(which('mainJakstatSignaling.m'));
@@ -18,7 +22,7 @@ amiData.Sigma_Y   = NaN(size(amiData.Y)); % preallocation of variances
 amiData           = amidata(amiData);     % calling the AMICI routine
 
 % objective function
-% fun = @(theta) logLikelihoodJakstat(theta, amiData);
+fun = @(theta) logLikelihoodJakstat(theta, amiData);
 x.p = ones(17,1);
 % 
 % 
@@ -28,12 +32,12 @@ x.p = ones(17,1);
 % x.f
 % 
 tic
-[x,fval,~] = rsc(fun,x.p);
+[p,fval,meta] = rsc(fun,x.p);
+toc
+fval,meta.iter
+% 
+options=optimoptions('fmincon','Algorithm','trust-region-reflective','HessianFcn','objective','SpecifyObjectiveGradient',true);
+tic
+[p,fval,exitflag,meta] = fmincon(fun,x.p,[],[],[],[],[],[],[],options);
 toc
 fval
-% 
-% options=optimoptions('fmincon','Algorithm','trust-region-reflective','HessianFcn','objective','SpecifyObjectiveGradient',true);
-% tic
-% [p,fval,exitflag,meta] = fmincon(fun,x.p,[],[],[],[],[],[],[],options);
-% toc
-% fval
