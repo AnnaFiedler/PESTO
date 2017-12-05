@@ -291,6 +291,10 @@ if strcmp(options.comp_type, 'sequential')
                 case 'bobyqa'
                     % Optimization using bobya as local optimizer
                     parameters = performOptimizationBobyqa(parameters, negLogPost, iMS, J_0, options);
+                    
+                case 'rsc'
+                    % Optimization using a regularized separable cubic trust region algorithm as local optimizer
+                    parameters = performOptimizationRsc(parameters, negLogPost, iMS, J_0, options);
             end
             
         end

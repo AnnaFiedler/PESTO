@@ -5,10 +5,8 @@ close all;
 
 addpath(genpath('../examples'));
 
-import optim.*
-
 % Seed random number generator
-rng(0);
+rng(1);
 
 %% Model Definition
 % See logLikelihood.m for a detailed description
@@ -55,9 +53,12 @@ lb = lowerBound * ones(4,1);
 ub = upperBound * ones(4,1);
 
 disp('fmincon:');
+parameters_fmincon = runMultiStarts(objectiveFunction, 1, n_starts, 'fmincon', 4, lb, ub);
+printResultParameters(parameters_fmincon);
 
-% parameters_fmincon = runMultiStarts(objectiveFunction, 1, n_starts, 'fmincon', 4, lb, ub);
-% printResultParameters(parameters_fmincon);
+disp('rsc:');
+parameters_rsc = runMultiStarts(objectiveFunction, 1, n_starts, 'rsc', 4, lb, ub);
+printResultParameters(parameters_rsc);
 
 % disp('hctt:');
 % parameters_hctt = runMultiStarts(objectiveFunction, 1, n_starts, 'hctt', 4, lb, ub);
@@ -68,33 +69,33 @@ disp('cs:');
 % parameters_cs = runMultiStarts(objectiveFunction, 1, n_starts, 'cs', 4, lb, ub);
 % printResultParameters(parameters_cs);
 
-disp('dhc:');
-parameters_dhc = runMultiStarts(objectiveFunction, 1, n_starts, 'dhc', 4, lb, ub);
-printResultParameters(parameters_dhc);
+% disp('dhc:');
+% parameters_dhc = runMultiStarts(objectiveFunction, 1, n_starts, 'dhc', 4, lb, ub);
+% printResultParameters(parameters_dhc);
+% 
+% disp('dhc2:');
+% parameters_dhc2 = runMultiStarts(objectiveFunction, 1, n_starts, 'dhc', 4, lb, ub, 2);
+% printResultParameters(parameters_dhc2);
+% 
+% disp('dhc2:');
+% parameters_dhc2 = runMultiStarts(objectiveFunction, 1, n_starts, 'dhc', 4, lb, ub, 2);
+% printResultParameters(parameters_dhc2);
+% 
+% disp('dhc3:');
+% parameters_dhc3 = runMultiStarts(objectiveFunction, 1, n_starts, 'dhc', 4, lb, ub, 3);
+% printResultParameters(parameters_dhc3);
+% 
+% disp('bobyqa:');
+% parameters_bobyqa = runMultiStarts(objectiveFunction, 1, n_starts, 'bobyqa', 4, lb, ub);
+% printResultParameters(parameters_bobyqa);
 
-disp('dhc2:');
-parameters_dhc2 = runMultiStarts(objectiveFunction, 1, n_starts, 'dhc', 4, lb, ub, 2);
-printResultParameters(parameters_dhc2);
-
-disp('dhc2:');
-parameters_dhc2 = runMultiStarts(objectiveFunction, 1, n_starts, 'dhc', 4, lb, ub, 2);
-printResultParameters(parameters_dhc2);
-
-disp('dhc3:');
-parameters_dhc3 = runMultiStarts(objectiveFunction, 1, n_starts, 'dhc', 4, lb, ub, 3);
-printResultParameters(parameters_dhc3);
-
-disp('bobyqa:');
-parameters_bobyqa = runMultiStarts(objectiveFunction, 1, n_starts, 'bobyqa', 4, lb, ub);
-printResultParameters(parameters_bobyqa);
-
-save('data_ec.mat');
+% save('data_ec.mat');
 
 function parameters = runMultiStarts(objectiveFunction, objOutNumber, nStarts, localOptimizer, nPar, parMin, parMax, varargin)
     clearPersistentVariables();
     
     tol = 1e-10;
-    numevals = 1000*nPar;
+    numevals = 100*nPar;
     
     options = PestoOptions();
     options.obj_type = 'log-posterior';
@@ -103,7 +104,7 @@ function parameters = runMultiStarts(objectiveFunction, objOutNumber, nStarts, l
     options.objOutNumber = objOutNumber;
     options.mode = 'visual';
     options.localOptimizer = localOptimizer;
-    options.localOptimizerOptions.GradObj="off";
+    options.localOptimizerOptions.GradObj="on";
     options.localOptimizerOptions.TolX          = tol;
     options.localOptimizerOptions.TolFun        = tol;
     options.localOptimizerOptions.MaxFunEvals   = numevals;
@@ -115,7 +116,12 @@ function parameters = runMultiStarts(objectiveFunction, objOutNumber, nStarts, l
     options.localOptimizerOptions.MaxFunctionEvaluations = numevals;
     options.localOptimizerOptions.MaxIterations = numevals;
     options.localOptimizerOptions.StepTolerance = tol;
-    options.localOptimizerOptions.Display = 'off';
+    options.localOptimizerOptions.Display = 'iter';
+    
+    options.localOptimizerOptions.Lb = parMin;
+    options.localOptimizerOptions.Ub = parMax;
+    options.localOptimizerOptions.Tol = 1e-6;
+%     options.localOptimizerOptions.Barrier = 'log-barrier';
     
     parameters.number = nPar;
     parameters.min = parMin;

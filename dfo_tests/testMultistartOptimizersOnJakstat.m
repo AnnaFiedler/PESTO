@@ -99,6 +99,7 @@ save('data_js.mat');
 function parameters = runMultiStarts(objectiveFunction, objOutNumber, nStarts, localOptimizer, nPar, parMin, parMax, varargin)
     clearPersistentVariables();
     
+    if (localO
     tol = 1e-10;
     numevals = 1000*nPar;
     
