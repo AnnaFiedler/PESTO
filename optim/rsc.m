@@ -25,25 +25,39 @@ function [x,fval,meta] = rsc(fun,x0,options)
 % initialize values
 x = x0(:);
 n = size(x,1);
+
+% initialize meta data indicating failure
 meta.exitflag = -1;
-meta.g = zeros(n,1);
-meta.H = zeros(n,n);
+meta.g = nan(n,1);
+meta.H = nan(n,n);
 meta.iterations = 0;
 meta.funEvals = 0;
+
+% unit roundoff
+epsilon = sqrt(eps);
+
 % parameters
 if nargin < 3, options = struct(); end
 [tol,sigma,sigma_small,sigma_factor,Delta,alpha,rhomin,rhomax,rho,maxIter,maxFunEvals,lb,ub,barrier] = getOptions(n,options);
+
 % check feasibility of starting point
 if any(x<lb) || any(x>ub)
     return;
 end
+
+% function value and derivatives at start point
 [fval,g,H] = fun(x);
-% check if function differentiable at starting point
+jIter = 1;
+jFunEvals = 1;
+
+% check if function differentiable at start point
 if isnan(fval) || isinf(fval) || any(isnan(g)) || any(isinf(g)) || any(any(isnan(H))) || any(any(isinf(H)))
     return;
 end
-% [U,T] = schur(A) where A = U*T*U', U unitary, T (Schur form)
-% upper triangular. Can be computed e.g. via QR.
+
+% [Q,T] = schur(A) where A = Q*T*Q', Q unitary, T (Schur form)
+% upper triangular. Can be computed e.g. via QR. For symmetric matrices,
+% this is the spectral decomposition with T = D diagonal.
 [Q,D] = schur(H);
 b = Q'*g;
 gnorm = norm(g,2);
@@ -54,9 +68,7 @@ y = zeros(n,1);
 % wrap function with barrier
 bounded_fun = @(x,jIter) bound_fun(x,fun,lb,ub,barrier,jIter,maxIter);
 
-jIter = 0;
-jFunEvals = 0;
-
+% main loop
 while gnorm > tol && jIter < maxIter && jFunEvals < maxFunEvals
     jIter = jIter + 1;
     
@@ -67,7 +79,7 @@ while gnorm > tol && jIter < maxIter && jFunEvals < maxFunEvals
     end
     
     % try step
-    s = Q*y;fprintf('%d %.15f %.15f %.15f \n',jIter,fval,gnorm,norm(s));
+    s = Q*y;fprintf('%d %.15f %.15f %.15f %f \n',jIter,fval,gnorm,norm(s),sigma);
     x_new = x + s;
     fval_new = bounded_fun(x_new,jIter);
     if isnan(fval_new) || isinf(fval_new) || fval_new > fval - alpha * sum(abs(y).^3)
@@ -92,8 +104,18 @@ while gnorm > tol && jIter < maxIter && jFunEvals < maxFunEvals
             % update values
             [Q_new,D_new] = schur(H_new);
             
-            % update rho inspired by secant equation
-            rho = diag((D_new-Q_new'*H*Q_new))./(Q_new'*s);
+            % update rho inspired by a third-order secant equation
+            denominator = Q_new'*s;
+            for j=1:n
+                dj = denominator(j);
+                if -epsilon < dj && dj <= 0
+                    denominator(j) = -epsilon;
+                elseif 0 < dj && dj < epsilon
+                    denominator(j) = epsilon;
+                end
+            end
+            rho = diag((D_new-Q_new'*H*Q_new))./denominator;
+            
             % keep rho within bounds
             rho = min(max(rho,rhomin),rhomax);
             
@@ -136,7 +158,7 @@ if c2 == 0 && c3 == 0 && c4 == 0
     z = argmin(zs,h);
 elseif c2 ~= 0 && c3 == 0 && c4 == 0
     zcrt = -c1/(2*c2);
-    if zcrt > DeltaNeg && zcrt < DeltaPos
+    if DeltaNeg < zcrt && zcrt < DeltaPos
         zs = [zs zcrt];
     end
     z = argmin(zs,h);
@@ -145,16 +167,20 @@ elseif c3 ~= 0 && c4 == 0
     if xi < 0
         z = argmin(zs,h);
     else
-        zlmin = argmin([(sqrt(xi)-2*c2)/(6*c3),(sqrt(xi)+2*c2)/(6*c3)],h);
-        if zlmin > DeltaNeg && zlmin < DeltaPos
-            zs = [zs zlmin];
+        zcrt1 = (sqrt(xi)-2*c2)/(6*c3);
+        zcrt2 = (sqrt(xi)+2*c2)/(6*c3);
+        if DeltaNeg < zcrt1 && zcrt1 < DeltaPos
+            zs = [zs zcrt1];
+        end
+        if DeltaNeg < zcrt2 && zcrt2 < DeltaPos
+            zs = [zs zcrt2];
         end
         z = argmin(zs,h);
     end
 elseif c4 ~= 0
-    zpos = minPoly(c0,c1,c2,c3+c4,0,0,DeltaPos);
     zneg = minPoly(c0,c1,c2,c3-c4,0,DeltaNeg,0);
-    z = argmin([zpos,zneg],h);
+    zpos = minPoly(c0,c1,c2,c3+c4,0,0,DeltaPos);
+    z = argmin([zneg,zpos],h);
 end
 end
 
@@ -180,7 +206,7 @@ tol = 1e-8;
 sigma = 0; % start with second order problem
 sigma_small = 0.1;
 sigma_factor = 2;
-Delta = 5;
+Delta = 2;
 alpha = 1*1e-4;
 rhomax = 1e3*ones(n,1);
 rhomin = -rhomax;
