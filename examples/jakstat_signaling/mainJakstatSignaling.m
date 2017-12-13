@@ -51,7 +51,7 @@ rng(0);
 
 [exdir,~,~]=fileparts(which('mainJakstatSignaling.m'));
 try
-    amiwrap('jakstat_pesto','jakstat_pesto_syms', exdir, 1);
+%     amiwrap('jakstat_pesto','jakstat_pesto_syms', exdir, 1);
 catch ME
     warning('There was a problem with the AMICI toolbox (available at https://github.com/ICB-DCM/AMICI), which is needed to run this example file. The original error message was:');
     rethrow(ME);
@@ -86,9 +86,11 @@ parameters.name    = {'log_{10}(p1)','log_{10}(p2)','log_{10}(p3)','log_{10}(p4)
     'log_{10}(\sigma_{pSTAT})','log_{10}(\sigma_{tSTAT})','log_{10}(\sigma_{pEpoR})'};
 
 % Initial guess for the parameters
+rng(1);
+nStarts = 10;
 par0 = bsxfun(@plus,parameters.min,bsxfun(@times,parameters.max ...
-       - parameters.min, lhsdesign(50,parameters.number,'smooth','off')'));
-parameters.guess = par0(:,1:50);
+       - parameters.min, lhsdesign(nStarts,parameters.number,'smooth','off')'));
+parameters.guess = par0(:,1:nStarts);
 
 % objective function
 objectiveFunction = @(theta) logLikelihoodJakstat(theta, amiData);
@@ -121,7 +123,7 @@ optionsPesto.mode     = 'visual';
 
 
 % Multi-start local optimization part
-optionsPesto.n_starts = 25;
+optionsPesto.n_starts = nStarts;
 optionsPesto.localOptimizer = 'fmincon';
 optionsPesto.localOptimizerOptions = optimset(...
     'Algorithm', 'interior-point',...
