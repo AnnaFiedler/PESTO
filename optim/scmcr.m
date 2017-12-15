@@ -1,4 +1,4 @@
-function [x,fval,meta] = rsc(fun,x0,options)
+function [x,fval,meta] = scmcr(fun,x0,options)
 % A regularized separable cubic trust-region method, based on
 % [Cubic-regularization counterpart of a variable-norm trust-region method
 % for unconstrained minimization. Martinez, Raydan. 2015]
@@ -28,6 +28,7 @@ n = size(x,1);
 
 % initialize meta data indicating failure
 meta.exitflag = -1;
+fval = nan;
 meta.g = nan(n,1);
 meta.H = nan(n,n);
 meta.iterations = 0;
@@ -69,6 +70,7 @@ y = zeros(n,1);
 bounded_fun = @(x,jIter) bound_fun(x,fun,lb,ub,barrier,jIter,maxIter);
 
 % main loop
+% TODO also add conditions for steplength and minimum (negative) eigenvalue
 while gnorm > tol && jIter < maxIter && jFunEvals < maxFunEvals
     jIter = jIter + 1;
     

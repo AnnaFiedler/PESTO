@@ -1,6 +1,6 @@
-function [parameters] = performOptimizationRsc(parameters, negLogPost, iMS, J_0, options)
+function [parameters] = performOptimizationScmcr(parameters, negLogPost, iMS, J_0, options)
 
-    [theta,J_opt,meta] = rsc(negLogPost,parameters.MS.par0(:,iMS),options.localOptimizerOptions);
+    [theta,J_opt,meta] = scmcr(negLogPost,parameters.MS.par0(:,iMS),options.localOptimizerOptions);
 
 
     % Assignment of results
